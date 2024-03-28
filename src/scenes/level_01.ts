@@ -1,4 +1,4 @@
-import { Scene } from 'phaser';
+import { Scene, Sound, GameObjects } from 'phaser';
 import { CENTER } from '..';
 import { PlayerArcade } from '../entities/player/playerArcade';
 import { PlayerControlsArcade } from '../entities/player/playerControlsArcade';
@@ -9,12 +9,14 @@ import {
     KineticBulletGroup,
 } from '../entities/projectiles/defaultBullet';
 
+type AudioSound = Sound.HTML5AudioSound | Sound.WebAudioSound | Sound.NoAudioSound;
+
 export class Level01 extends Scene {
     constructor() {
         super('level01');
     }
 
-    image: any;
+    backgroundImage: GameObjects.Image;
     platforms: any;
     platformsCount = 200;
     player: PlayerArcade;
@@ -24,7 +26,7 @@ export class Level01 extends Scene {
     playerControls: PlayerControlsArcade;
 
     ambientLightColor = 0x444444;
-    light: any;
+    light: GameObjects.Light;
 
     // groups
     bulletGroup: DefaultBulletGroup;
@@ -33,11 +35,11 @@ export class Level01 extends Scene {
 
     // audio
 
-    pistolSfx: any;
-    rifleSfx: any;
-    shotgunSfx: any;
+    pistolSfx: AudioSound;
+    rifleSfx: AudioSound;
+    shotgunSfx: AudioSound;
 
-    weaponSwitchSfx: any;
+    weaponSwitchSfx: AudioSound;
 
     preload() {
         this.load.image('background', 'assets/Starfield-7.png');
@@ -62,7 +64,7 @@ export class Level01 extends Scene {
         this.shotgunSfx = this.sound.add('shotgun');
         this.weaponSwitchSfx = this.sound.add('weaponSwitch');
 
-        this.image = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
+        this.backgroundImage = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
         // static group
         this.platforms = this.physics.add.staticGroup();
 
@@ -112,16 +114,20 @@ export class Level01 extends Scene {
     createPlatforms(quantity: number) {
         for (let i = 0; i < quantity; i++) {
             const coords = {
-                x: Math.floor(Math.random() * 1000),
-                y: Math.floor(Math.random() * 1000),
+                x: Math.floor(Math.random() * 1500),
+                y: Math.floor(Math.random() * 1500),
             };
             // set pipeline adds lightning rendering
-            this.platforms.create(coords.x, coords.y, 'ground').setPipeline('Light2D');
+            this.platforms
+                .create(coords.x, coords.y, 'ground')
+                .setPipeline('Light2D')
+                .setScale(Math.random() * 2 + 0.5)
+                .refreshBody();
         }
     }
     createFloor() {
         for (let i = 0; i < 100; i++) {
-            this.platforms.create(32 * i, 800, 'ground').setPipeline('Light2D');
+            this.platforms.create(32 * i, 1500, 'ground').setPipeline('Light2D');
         }
     }
 
