@@ -50,6 +50,7 @@ export class EnergyBullet extends DefaultBullet {
         super(scene, x, y, textureName);
         this.speed = 300;
         this.setScale(0.5);
+        // turn off gravity for this class
     }
 }
 

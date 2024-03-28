@@ -81,13 +81,22 @@ export class PlayerControlsArcade {
 
     // add switchWeapon method to the player class and operate there...
     handleWeaponSwitch() {
-        if (this.weaponSlotKeys.slot0!.isDown) {
+        // if (this.weaponSlotKeys.slot0!.isDown) {
+        //     this.player.switchWeapon(0);
+        // } else if (this.weaponSlotKeys.slot1!.isDown) {
+        //     this.player.switchWeapon(1);
+        // } else if (this.weaponSlotKeys.slot2!.isDown) {
+        //     this.player.switchWeapon(2);
+        // } else if (this.weaponSlotKeys.slot3!.isDown) {
+        //     this.player.switchWeapon(3);
+        // }
+        if (Input.Keyboard.JustDown(this.weaponSlotKeys.slot0!)) {
             this.player.switchWeapon(0);
-        } else if (this.weaponSlotKeys.slot1!.isDown) {
+        } else if (Input.Keyboard.JustDown(this.weaponSlotKeys.slot1!)) {
             this.player.switchWeapon(1);
-        } else if (this.weaponSlotKeys.slot2!.isDown) {
+        } else if (Input.Keyboard.JustDown(this.weaponSlotKeys.slot2!)) {
             this.player.switchWeapon(2);
-        } else if (this.weaponSlotKeys.slot3!.isDown) {
+        } else if (Input.Keyboard.JustDown(this.weaponSlotKeys.slot3!)) {
             this.player.switchWeapon(3);
         }
     }

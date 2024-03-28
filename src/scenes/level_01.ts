@@ -4,10 +4,7 @@ import { PlayerArcade } from '../entities/player/playerArcade';
 import { PlayerControlsArcade } from '../entities/player/playerControlsArcade';
 import {
     Bullet,
-    DefaultBullet,
     DefaultBulletGroup,
-    DirVector,
-    EnergyBullet,
     EnergyBulletGroup,
     KineticBulletGroup,
 } from '../entities/projectiles/defaultBullet';
@@ -30,12 +27,20 @@ export class Level01 extends Scene {
     ambientLightColor = 0x444444;
     light: any;
 
-    cursor: any;
+    // cursor: any;
 
     // groups
     bulletGroup: DefaultBulletGroup;
     kineticBulletGroup: KineticBulletGroup;
     energyBulletGroup: EnergyBulletGroup;
+
+    // audio
+
+    pistolSfx: any;
+    rifleSfx: any;
+    shotgunSfx: any;
+
+    weaponSwitchSfx: any;
 
     preload() {
         this.load.image('background', 'assets/Starfield-7.png');
@@ -45,8 +50,21 @@ export class Level01 extends Scene {
         this.load.image('bullet', 'assets/bullet.png');
         this.load.image('kineticBullet', 'assets/kineticBullet.png');
         this.load.image('energyBullet', 'assets/energyBullet.png');
+        this.load.image('crosshair', 'assets/crosshair.png');
+
+        this.load.audio('pistol', 'assets/audio/pistol.ogg');
+        this.load.audio('rifle', 'assets/audio/rifle.ogg');
+        this.load.audio('shotgun', 'assets/audio/shotgun.ogg');
+        this.load.audio('weaponSwitch', 'assets/audio/weapswitch.ogg');
     }
     create() {
+        this.input.setDefaultCursor('url(assets/crosshair.png), pointer');
+
+        this.pistolSfx = this.sound.add('pistol');
+        this.rifleSfx = this.sound.add('rifle');
+        this.shotgunSfx = this.sound.add('shotgun');
+        this.weaponSwitchSfx = this.sound.add('weaponSwitch');
+
         // this.add.text(100, 100, 'onomatopeja');
         this.image = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
         // static group
@@ -69,8 +87,6 @@ export class Level01 extends Scene {
         // camera follow player
         this.cameras.main.startFollow(this.player);
         this.cameras.main.setZoom(2);
-
-        this.input.setDefaultCursor('url(assets/ghost.png), pointer');
 
         this.bulletGroup = new DefaultBulletGroup(this);
         this.kineticBulletGroup = new KineticBulletGroup(this);
@@ -119,7 +135,7 @@ export class Level01 extends Scene {
     //     this.cursor.x
     // }
 
-    fireBullet(bulletType: Bullet, shakeIntensity = 0.001) {
+    fireBullet(bulletType: Bullet, shakeIntensity = 0.001, bulletSound: string) {
         // this.cameras.main.shake(time, intensity)
         // this.cameras.main.shake(time, )
         this.cameras.main.shake(200, shakeIntensity);
@@ -136,13 +152,32 @@ export class Level01 extends Scene {
                 bullet = this.energyBulletGroup.get().setActive(true).setVisible(true);
         }
 
-        // const bullet: DefaultBullet = this.bulletGroup.get().setActive(true).setVisible(true);
         if (bullet) {
             const shooter = { x: this.player.x, y: this.player.y };
             // x, y coordinates of pointer in world space
             const target = { x: this.input.activePointer.worldX, y: this.input.activePointer.worldY };
-
+            // this.pistolSfx.play();
+            // this.rifleSfx.play();
+            // this.shotgunSfx.play();
             bullet.fire(shooter, target);
+            this.playBulletSound(bulletSound);
+        }
+    }
+
+    playBulletSound(bulletSound: string) {
+        switch (bulletSound) {
+            case 'pistol':
+                this.pistolSfx.play();
+                break;
+            case 'rifle':
+                this.rifleSfx.play();
+                break;
+            case 'shotgun':
+                this.shotgunSfx.play();
+                break;
+            default:
+                this.weaponSwitchSfx.play();
+                break;
         }
     }
 }
