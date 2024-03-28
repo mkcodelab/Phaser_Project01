@@ -8,6 +8,7 @@ interface ControlKeys {
     right: Key;
     jump: Key;
     sprint: Key;
+    inventory: Key;
 }
 
 interface WeaponSlotKeys {
@@ -17,31 +18,20 @@ interface WeaponSlotKeys {
     slot3: Key;
 }
 
-// interface MouseButons {
-//     lmb: any;
-//     rmb: any;
-// }
-
 export class PlayerControlsArcade {
-    cursors: any;
-    // player: PlayerArcade;
-
     currentSpeed: number;
 
     controlKeys: ControlKeys;
 
     weaponSlotKeys: WeaponSlotKeys;
 
-    // mouseButtons: MouseButons;
-
     constructor(public scene: Scene, public player: PlayerArcade) {
-        // this.player = player;
-
         this.controlKeys = {
             left: scene.input.keyboard?.addKey(Input.Keyboard.KeyCodes.A),
             right: scene.input.keyboard?.addKey(Input.Keyboard.KeyCodes.D),
             jump: scene.input.keyboard?.addKey(Input.Keyboard.KeyCodes.SPACE),
             sprint: scene.input.keyboard?.addKey(Input.Keyboard.KeyCodes.SHIFT),
+            inventory: scene.input.keyboard?.addKey(Input.Keyboard.KeyCodes.I),
         };
 
         this.weaponSlotKeys = {
@@ -81,15 +71,6 @@ export class PlayerControlsArcade {
 
     // add switchWeapon method to the player class and operate there...
     handleWeaponSwitch() {
-        // if (this.weaponSlotKeys.slot0!.isDown) {
-        //     this.player.switchWeapon(0);
-        // } else if (this.weaponSlotKeys.slot1!.isDown) {
-        //     this.player.switchWeapon(1);
-        // } else if (this.weaponSlotKeys.slot2!.isDown) {
-        //     this.player.switchWeapon(2);
-        // } else if (this.weaponSlotKeys.slot3!.isDown) {
-        //     this.player.switchWeapon(3);
-        // }
         if (Input.Keyboard.JustDown(this.weaponSlotKeys.slot0!)) {
             this.player.switchWeapon(0);
         } else if (Input.Keyboard.JustDown(this.weaponSlotKeys.slot1!)) {

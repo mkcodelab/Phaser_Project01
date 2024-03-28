@@ -52,3 +52,22 @@ const config = {
 };
 
 const game = new Game(config);
+
+// let inventoryOpened = false;
+
+window.document.addEventListener('keydown', (event) => {
+    if (event.key === 'i') {
+        openInventory();
+    }
+});
+
+const inventory: HTMLElement = window.document.createElement('div');
+inventory.classList.add('inventory', 'closed');
+document.body.appendChild(inventory);
+// const inventory: HTMLElement | null = document.querySelector('inventory');
+
+function openInventory() {
+    if (inventory) {
+        inventory.classList.toggle('closed');
+    }
+}

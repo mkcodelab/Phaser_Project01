@@ -48,7 +48,7 @@ export class KineticBullet extends DefaultBullet {
 export class EnergyBullet extends DefaultBullet {
     constructor(scene: Scene, x: number, y: number, textureName: string = 'energyBullet') {
         super(scene, x, y, textureName);
-        this.speed = 300;
+        this.speed = 500;
         this.setScale(0.5);
         // turn off gravity for this class
     }

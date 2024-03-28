@@ -3,7 +3,7 @@ type AmmunitionSound = 'pistol' | 'rifle' | 'shotgun' | 'default' | undefined;
 
 /**
  * @param reloadTime - reload time in milliseconds
- * @paramm recoil -
+ * @param recoil - camera shake i.e. 0.001
  */
 export interface Weapon {
     ammunitionType: AmmunitionType;
@@ -23,4 +23,22 @@ export class Weapon01 implements Weapon {
         public recoil: number,
         public sound: AmmunitionSound
     ) {}
+}
+
+export class Weapon02 implements Weapon {
+    ammunitionType: AmmunitionType;
+    ammunitionQuantity: number;
+    baseDamage: number;
+    reloadTime: number;
+    recoil: number;
+    sound: AmmunitionSound;
+
+    constructor(weaponConfig: Weapon) {
+        this.ammunitionType = weaponConfig.ammunitionType;
+        this.ammunitionQuantity = weaponConfig.ammunitionQuantity;
+        this.baseDamage = weaponConfig.baseDamage;
+        this.reloadTime = weaponConfig.reloadTime;
+        this.recoil = weaponConfig.recoil;
+        this.sound = weaponConfig.sound;
+    }
 }
