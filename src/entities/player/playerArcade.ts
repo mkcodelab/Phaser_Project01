@@ -21,6 +21,15 @@ const blaster: Weapon = new Weapon02({
     sound: 'pistol',
 });
 
+const minigun: Weapon = new Weapon02({
+    ammunitionType: 'kinetic',
+    ammunitionQuantity: 500,
+    baseDamage: 10,
+    reloadTime: 50,
+    recoil: 0.001,
+    sound: 'minigun',
+});
+
 export class PlayerArcade extends Physics.Arcade.Sprite {
     maxHealth = 100;
     currentHealth = 100;
@@ -45,14 +54,9 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
 
         this.resources = new PlayerResources();
 
-        // this.weapons.push(new Weapon01('energy', 200, 100, 200, 0.001, 'shotgun'));
-        // this.weapons.push(new Weapon01('kinetic', 200, 100, 600, 0.001, undefined));
-        // this.weapons.push(new Weapon01('default', 20, 1000, 1000, 0.01, 'rifle'));
-        // this.weapons.push(new Weapon01('kinetic', 500, 20, 100, 0.0005, 'pistol'));
-
-        // this.weapons.push(rifle);
         this.addWeapon(rifle);
         this.addWeapon(blaster);
+        this.addWeapon(minigun);
 
         this.currentWeapon = this.weapons[0];
     }
@@ -60,12 +64,16 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
     shoot() {
         // console.log('shoot');
         if (typeof this.scene['fireBullet'] === 'function') {
-            if (this.canShoot) {
+            if (this.canShoot && this.currentWeapon.ammunitionQuantity > 0) {
+                // pass this data to some kind of player HUD
+                console.log(this.currentWeapon.ammunitionQuantity);
+
                 this.scene.fireBullet(
                     this.currentWeapon.ammunitionType,
                     this.currentWeapon.recoil,
                     this.currentWeapon.sound
                 );
+                this.currentWeapon.ammunitionQuantity--;
 
                 this.canShoot = false;
                 setTimeout(() => (this.canShoot = true), this.currentWeapon.reloadTime);
@@ -104,5 +112,9 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
                 this.currentHealth += value;
             }
         }
+    }
+
+    addAmmunition(quantity: number, ammoType?: string) {
+        this.currentWeapon.ammunitionQuantity += quantity;
     }
 }

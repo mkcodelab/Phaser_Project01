@@ -38,6 +38,7 @@ export class Level01 extends Scene {
     pistolSfx: AudioSound;
     rifleSfx: AudioSound;
     shotgunSfx: AudioSound;
+    minigunSfx: AudioSound;
 
     weaponSwitchSfx: AudioSound;
 
@@ -54,6 +55,7 @@ export class Level01 extends Scene {
         this.load.audio('pistol', 'assets/audio/pistol.ogg');
         this.load.audio('rifle', 'assets/audio/rifle.ogg');
         this.load.audio('shotgun', 'assets/audio/shotgun.ogg');
+        this.load.audio('minigun', 'assets/audio/minigun.ogg');
         this.load.audio('weaponSwitch', 'assets/audio/weapswitch.ogg');
     }
     create() {
@@ -62,6 +64,7 @@ export class Level01 extends Scene {
         this.pistolSfx = this.sound.add('pistol');
         this.rifleSfx = this.sound.add('rifle');
         this.shotgunSfx = this.sound.add('shotgun');
+        this.minigunSfx = this.sound.add('minigun');
         this.weaponSwitchSfx = this.sound.add('weaponSwitch');
 
         this.backgroundImage = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
@@ -167,6 +170,9 @@ export class Level01 extends Scene {
                 break;
             case 'shotgun':
                 this.shotgunSfx.play();
+                break;
+            case 'minigun':
+                this.minigunSfx.play();
                 break;
             default:
                 this.weaponSwitchSfx.play();

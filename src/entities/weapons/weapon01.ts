@@ -1,5 +1,5 @@
 type AmmunitionType = 'energy' | 'kinetic' | 'default';
-type AmmunitionSound = 'pistol' | 'rifle' | 'shotgun' | 'default' | undefined;
+type AmmunitionSound = 'pistol' | 'rifle' | 'shotgun' | 'minigun' | 'default' | undefined;
 
 /**
  * @param reloadTime - reload time in milliseconds
