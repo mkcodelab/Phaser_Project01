@@ -1,4 +1,4 @@
-import { Physics, Scene, Math as P_Math } from 'phaser';
+import { Scene } from 'phaser';
 import { CENTER } from '..';
 import { PlayerArcade } from '../entities/player/playerArcade';
 import { PlayerControlsArcade } from '../entities/player/playerControlsArcade';
@@ -8,7 +8,6 @@ import {
     EnergyBulletGroup,
     KineticBulletGroup,
 } from '../entities/projectiles/defaultBullet';
-import { PlayerResources } from '../entities/resources/resources';
 
 export class Level01 extends Scene {
     constructor() {
@@ -26,8 +25,6 @@ export class Level01 extends Scene {
 
     ambientLightColor = 0x444444;
     light: any;
-
-    // cursor: any;
 
     // groups
     bulletGroup: DefaultBulletGroup;
@@ -65,7 +62,6 @@ export class Level01 extends Scene {
         this.shotgunSfx = this.sound.add('shotgun');
         this.weaponSwitchSfx = this.sound.add('weaponSwitch');
 
-        // this.add.text(100, 100, 'onomatopeja');
         this.image = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
         // static group
         this.platforms = this.physics.add.staticGroup();
@@ -109,8 +105,6 @@ export class Level01 extends Scene {
         this.playerControls.handleMouseInput();
         this.playerControls.handleWeaponSwitch();
 
-        // this.image.rotation += 0.005;a
-
         this.light.x = this.player.x;
         this.light.y = this.player.y;
     }
@@ -131,13 +125,8 @@ export class Level01 extends Scene {
         }
     }
 
-    // updateCursor(pointer: any) {
-    //     this.cursor.x
-    // }
-
     fireBullet(bulletType: Bullet, shakeIntensity = 0.001, bulletSound: string) {
         // this.cameras.main.shake(time, intensity)
-        // this.cameras.main.shake(time, )
         this.cameras.main.shake(200, shakeIntensity);
 
         let bullet: any;
@@ -156,9 +145,7 @@ export class Level01 extends Scene {
             const shooter = { x: this.player.x, y: this.player.y };
             // x, y coordinates of pointer in world space
             const target = { x: this.input.activePointer.worldX, y: this.input.activePointer.worldY };
-            // this.pistolSfx.play();
-            // this.rifleSfx.play();
-            // this.shotgunSfx.play();
+
             bullet.fire(shooter, target);
             this.playBulletSound(bulletSound);
         }
