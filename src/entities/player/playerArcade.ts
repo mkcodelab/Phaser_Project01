@@ -25,10 +25,10 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
 
         this.resources = new PlayerResources();
 
-        this.weapons.push(new Weapon01('energy', 200, 100, 200));
-        this.weapons.push(new Weapon01('physical', 200, 100, 600));
-        this.weapons.push(new Weapon01('physical', 20, 1000, 1000));
-        this.weapons.push(new Weapon01('energy', 500, 20, 100));
+        this.weapons.push(new Weapon01('energy', 200, 100, 200, 0.001));
+        this.weapons.push(new Weapon01('kinetic', 200, 100, 600, 0.001));
+        this.weapons.push(new Weapon01('default', 20, 1000, 1000, 0.01));
+        this.weapons.push(new Weapon01('kinetic', 500, 20, 100, 0.0005));
 
         this.currentWeapon = this.weapons[0];
     }
@@ -37,7 +37,7 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
         // console.log('shoot');
         if (typeof this.scene['fireBullet'] === 'function') {
             if (this.canShoot) {
-                this.scene.fireBullet();
+                this.scene.fireBullet(this.currentWeapon.ammunitionType, this.currentWeapon.recoil);
 
                 this.canShoot = false;
                 setTimeout(() => (this.canShoot = true), this.currentWeapon.reloadTime);

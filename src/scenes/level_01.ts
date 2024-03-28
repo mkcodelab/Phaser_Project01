@@ -2,7 +2,15 @@ import { Physics, Scene, Math as P_Math } from 'phaser';
 import { CENTER } from '..';
 import { PlayerArcade } from '../entities/player/playerArcade';
 import { PlayerControlsArcade } from '../entities/player/playerControlsArcade';
-import { DefaultBullet, DefaultBulletGroup, DirVector } from '../entities/projectiles/defaultBullet';
+import {
+    Bullet,
+    DefaultBullet,
+    DefaultBulletGroup,
+    DirVector,
+    EnergyBullet,
+    EnergyBulletGroup,
+    KineticBulletGroup,
+} from '../entities/projectiles/defaultBullet';
 import { PlayerResources } from '../entities/resources/resources';
 
 export class Level01 extends Scene {
@@ -24,14 +32,10 @@ export class Level01 extends Scene {
 
     cursor: any;
 
-    laserGroup: DefaultBulletGroup;
-
-    bulletGroup: any;
-
-    // reticle = {
-    //     x: 0,
-    //     y: 0,
-    // };
+    // groups
+    bulletGroup: DefaultBulletGroup;
+    kineticBulletGroup: KineticBulletGroup;
+    energyBulletGroup: EnergyBulletGroup;
 
     preload() {
         this.load.image('background', 'assets/Starfield-7.png');
@@ -39,6 +43,8 @@ export class Level01 extends Scene {
         this.load.image('gumiak', 'assets/gumiak.png');
         this.load.image('ghost', 'assets/ghost.png');
         this.load.image('bullet', 'assets/bullet.png');
+        this.load.image('kineticBullet', 'assets/kineticBullet.png');
+        this.load.image('energyBullet', 'assets/energyBullet.png');
     }
     create() {
         // this.add.text(100, 100, 'onomatopeja');
@@ -66,22 +72,18 @@ export class Level01 extends Scene {
 
         this.input.setDefaultCursor('url(assets/ghost.png), pointer');
 
-        // this.laserGroup = new DefaultBulletGroup(this);
-        this.bulletGroup = this.physics.add.group({ classType: DefaultBullet, runChildUpdate: true });
+        this.bulletGroup = new DefaultBulletGroup(this);
+        this.kineticBulletGroup = new KineticBulletGroup(this);
+        this.energyBulletGroup = new EnergyBulletGroup(this);
 
+        // destroy bullets on contact
         this.physics.add.collider(this.platforms, this.bulletGroup, (platforms, projectile) => {
             projectile.destroy();
         });
 
-        // this.input.on('pointermove', (pointer: any) => {
-        //     this.reticle.x = this.player.x;
-        //     this.reticle.y = this.player.y;
-        //     // console.log(this.reticle, pointer.x, pointer.y);
-        //     // console.log(this.input.activePointer.worldX);
-
-        //     // this.reticle.x += pointer.x;
-        //     // this.reticle.y += pointer.y;
-        // });
+        this.physics.add.collider(this.platforms, this.kineticBulletGroup, (platforms, projectile) => {
+            projectile.destroy();
+        });
 
         this.player.resources.addResource('lightPoints', 20);
         console.log(this.player.resources.getResource('lightPoints'));
@@ -117,19 +119,29 @@ export class Level01 extends Scene {
     //     this.cursor.x
     // }
 
-    fireBullet() {
-        this.cameras.main.shake(200, 0.001);
-        // const mouseVector: DirVector = { x: this.input.mousePointer.position.x, y: this.input.mousePointer.position.x };
-        // this.laserGroup.fireLaser(this.player.x, this.player.y, mouseVector);
+    fireBullet(bulletType: Bullet, shakeIntensity = 0.001) {
+        // this.cameras.main.shake(time, intensity)
+        // this.cameras.main.shake(time, )
+        this.cameras.main.shake(200, shakeIntensity);
 
-        const bullet: DefaultBullet = this.bulletGroup.get().setActive(true).setVisible(true);
+        let bullet: any;
+        switch (bulletType) {
+            case 'default':
+                bullet = this.bulletGroup.get().setActive(true).setVisible(true);
+                break;
+            case 'kinetic':
+                bullet = this.kineticBulletGroup.get().setActive(true).setVisible(true);
+                break;
+            case 'energy':
+                bullet = this.energyBulletGroup.get().setActive(true).setVisible(true);
+        }
+
+        // const bullet: DefaultBullet = this.bulletGroup.get().setActive(true).setVisible(true);
         if (bullet) {
             const shooter = { x: this.player.x, y: this.player.y };
-            // the problem is with the target, because it has pageX and pageY not scene.x scene.y
+            // x, y coordinates of pointer in world space
             const target = { x: this.input.activePointer.worldX, y: this.input.activePointer.worldY };
-            // const angle = P_Math.Angle.BetweenPoints(shooter, target);
-            // console.log(shooter, target, angle);
-            // console.log(mouseVector);
+
             bullet.fire(shooter, target);
         }
     }

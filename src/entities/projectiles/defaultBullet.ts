@@ -1,28 +1,56 @@
 import { Physics, Scene, Math as P_Math } from 'phaser';
 
+export type Bullet = 'default' | 'energy' | 'laser' | 'kinetic';
+
 export type DirVector = {
     x: number;
     y: number;
 };
 
 export class DefaultBullet extends Physics.Arcade.Sprite {
-    speed = 600;
+    speed: number;
+    angleBetweenShooter: number;
+    spriteAngle: number;
+    constructor(scene: Scene, x: number, y: number, textureName: string = 'bullet') {
+        super(scene, x, y, textureName);
 
-    constructor(scene: Scene, x: number, y: number) {
-        super(scene, x, y, 'bullet');
-        this.angle = 0;
+        // this.angle - angle of the sprite
+        this.angleBetweenShooter = 0;
+        // rotate sprite at random angle
+        this.spriteAngle = Math.random() * 360;
+        this.speed = 700;
     }
 
     fire(shooter: DirVector, target: DirVector) {
         this.setPosition(shooter.x, shooter.y);
-        this.angle = P_Math.Angle.BetweenPoints(shooter, target);
-        this.scene.physics.velocityFromRotation(this.angle, this.speed, this.body?.velocity);
+        // returns angle in radians
+        this.angleBetweenShooter = P_Math.Angle.BetweenPoints(shooter, target);
+        // this.setAngle(this.spriteAngle);
+        this.scene.physics.velocityFromRotation(this.angleBetweenShooter, this.speed, this.body?.velocity);
     }
+}
 
-    // onCollision() {
-    //     console.log('collision');
-    //     this.destroy();
-    // }
+export class KineticBullet extends DefaultBullet {
+    constructor(scene: Scene, x: number, y: number, textureName: string = 'kinematicBullet') {
+        super(scene, x, y, textureName);
+
+        this.speed = 900;
+    }
+    fire(shooter: DirVector, target: DirVector) {
+        super.fire(shooter, target);
+        // change radians to degrees
+        const projectileAngle = P_Math.RadToDeg(this.angleBetweenShooter);
+        // rotate sprite to the target
+        this.setAngle(projectileAngle - 90);
+    }
+}
+
+export class EnergyBullet extends DefaultBullet {
+    constructor(scene: Scene, x: number, y: number, textureName: string = 'energyBullet') {
+        super(scene, x, y, textureName);
+        this.speed = 300;
+        this.setScale(0.5);
+    }
 }
 
 //
@@ -30,20 +58,45 @@ export class DefaultBullet extends Physics.Arcade.Sprite {
 export class DefaultBulletGroup extends Physics.Arcade.Group {
     constructor(scene: Scene) {
         super(scene.physics.world, scene);
+        this.runChildUpdate = true;
+        this.defaultKey = 'bullet';
 
         this.createMultiple({
             classType: DefaultBullet,
-            frameQuantity: 30,
             active: false,
             visible: false,
             key: 'bullet',
         });
     }
+}
 
-    fireLaser(x: number, y: number, direction: DirVector) {
-        const laser = this.getFirstDead(false);
-        if (laser) {
-            laser.fire(x, y, direction);
-        }
+export class KineticBulletGroup extends Physics.Arcade.Group {
+    constructor(scene: Scene) {
+        super(scene.physics.world, scene);
+        this.runChildUpdate = true;
+        this.defaultKey = 'kineticBullet';
+
+        this.createMultiple({
+            classType: KineticBullet,
+            active: false,
+            visible: false,
+            key: 'kineticBullet',
+        });
+    }
+}
+
+export class EnergyBulletGroup extends Physics.Arcade.Group {
+    constructor(scene: Scene) {
+        super(scene.physics.world, scene);
+
+        this.runChildUpdate = true;
+        this.defaultKey = 'energyBullet';
+
+        this.createMultiple({
+            classType: EnergyBullet,
+            active: false,
+            visible: false,
+            key: 'energyBullet',
+        });
     }
 }
