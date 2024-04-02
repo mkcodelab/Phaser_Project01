@@ -1,46 +1,20 @@
-import { Physics, Scene } from 'phaser';
+import { Physics } from 'phaser';
 import { PlayerResources } from '../resources/resources';
-import { Weapon, Weapon01, Weapon02 } from '../weapons/weapon01';
+import { Weapon, blaster, fireball, minigun, rifle } from '../weapons/weapon01';
 
-// move them somewhere else later
-const rifle: Weapon = new Weapon02({
-    ammunitionType: 'kinetic',
-    ammunitionQuantity: 200,
-    baseDamage: 100,
-    reloadTime: 600,
-    recoil: 0.001,
-    sound: 'rifle',
-});
+import { Events } from 'phaser';
 
-const blaster: Weapon = new Weapon02({
-    ammunitionType: 'energy',
-    ammunitionQuantity: 200,
-    baseDamage: 50,
-    reloadTime: 300,
-    recoil: 0.001,
-    sound: 'pistol',
-});
-
-const minigun: Weapon = new Weapon02({
-    ammunitionType: 'kinetic',
-    ammunitionQuantity: 500,
-    baseDamage: 10,
-    reloadTime: 50,
-    recoil: 0.001,
-    sound: 'minigun',
-});
+export const playerEvents = new Events.EventEmitter();
 
 export class PlayerArcade extends Physics.Arcade.Sprite {
     maxHealth = 100;
     currentHealth = 100;
     sprintSpeed = 260;
     speed = 160;
-    // reload milliseconds
-    reload = 200;
-    // scene: any;
+
     resources: PlayerResources;
 
-    weapons: Weapon[] = [];
+    weaponsHotbar: Weapon[] = [];
 
     currentWeapon: Weapon;
 
@@ -57,42 +31,43 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
         this.addWeapon(rifle);
         this.addWeapon(blaster);
         this.addWeapon(minigun);
+        this.addWeapon(fireball);
 
-        this.currentWeapon = this.weapons[0];
+        this.currentWeapon = this.weaponsHotbar[0];
     }
 
     shoot() {
-        // console.log('shoot');
-        if (typeof this.scene['fireBullet'] === 'function') {
+        // typeof this.scene['fireBullet'] === 'function'
+        if (this.scene.fireBullet) {
             if (this.canShoot && this.currentWeapon.ammunitionQuantity > 0) {
-                // pass this data to some kind of player HUD
-                console.log(this.currentWeapon.ammunitionQuantity);
-
                 this.scene.fireBullet(
                     this.currentWeapon.ammunitionType,
                     this.currentWeapon.recoil,
-                    this.currentWeapon.sound
+                    this.currentWeapon.sound,
+                    this.currentWeapon.bulletSpeed ?? undefined
                 );
                 this.currentWeapon.ammunitionQuantity--;
+
+                // emit event, passing current ammo data
+                playerEvents.emit('ammo', this.currentWeapon.ammunitionQuantity);
 
                 this.canShoot = false;
                 setTimeout(() => (this.canShoot = true), this.currentWeapon.reloadTime);
             }
         }
-        // console.log(this.scene);
     }
 
     switchWeapon(id: number) {
         // check if index of weapon exist
-        if (typeof this.weapons[id] !== 'undefined') {
-            // console.log('switched to: ', id);
+        if (typeof this.weaponsHotbar[id] !== 'undefined') {
             this.scene.weaponSwitchSfx.play();
-            this.currentWeapon = this.weapons[id];
+            this.currentWeapon = this.weaponsHotbar[id];
+            playerEvents.emit('currentWeapon', this.currentWeapon.name);
         }
     }
 
     addWeapon(weapon: Weapon) {
-        this.weapons.push(weapon);
+        this.weaponsHotbar.push(weapon);
     }
 
     applyDamage(value: number) {
@@ -116,5 +91,6 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
 
     addAmmunition(quantity: number, ammoType?: string) {
         this.currentWeapon.ammunitionQuantity += quantity;
+        playerEvents.emit('ammo', this.currentWeapon.ammunitionQuantity);
     }
 }

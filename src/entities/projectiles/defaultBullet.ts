@@ -21,12 +21,16 @@ export class DefaultBullet extends Physics.Arcade.Sprite {
         this.speed = 700;
     }
 
-    fire(shooter: DirVector, target: DirVector) {
+    fire(shooter: DirVector, target: DirVector, bulletSpeed?: number) {
         this.setPosition(shooter.x, shooter.y);
         // returns angle in radians
         this.angleBetweenShooter = P_Math.Angle.BetweenPoints(shooter, target);
         // this.setAngle(this.spriteAngle);
-        this.scene.physics.velocityFromRotation(this.angleBetweenShooter, this.speed, this.body?.velocity);
+        this.scene.physics.velocityFromRotation(
+            this.angleBetweenShooter,
+            bulletSpeed ?? this.speed,
+            this.body?.velocity
+        );
     }
 }
 
@@ -34,10 +38,10 @@ export class KineticBullet extends DefaultBullet {
     constructor(scene: Scene, x: number, y: number, textureName: string = 'kinematicBullet') {
         super(scene, x, y, textureName);
 
-        this.speed = 900;
+        // this.speed = 900;
     }
-    fire(shooter: DirVector, target: DirVector) {
-        super.fire(shooter, target);
+    fire(shooter: DirVector, target: DirVector, bulletSpeed?: number) {
+        super.fire(shooter, target, bulletSpeed);
         // change radians to degrees
         const projectileAngle = P_Math.RadToDeg(this.angleBetweenShooter);
         // rotate sprite to the target
@@ -48,7 +52,7 @@ export class KineticBullet extends DefaultBullet {
 export class EnergyBullet extends DefaultBullet {
     constructor(scene: Scene, x: number, y: number, textureName: string = 'energyBullet') {
         super(scene, x, y, textureName);
-        this.speed = 500;
+        // this.speed = 500;
         this.setScale(0.5);
         // turn off gravity for this class
     }
