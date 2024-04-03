@@ -51,7 +51,6 @@ export class Level01 extends Scene {
 
     bellSfx: AudioSound;
 
-    enemy: EnemyGhost;
     enemyGhostGroup: Physics.Arcade.Group;
 
     preload() {
@@ -143,25 +142,20 @@ export class Level01 extends Scene {
 
         // enemies
 
-        this.enemyGhostGroup = this.physics.add.group();
+        this.enemyGhostGroup = this.physics.add.group({
+            allowGravity: false,
+        });
 
         this.addEnemies();
 
         this.physics.add.overlap(this.enemyGhostGroup, this.kineticBulletGroup, (ghost, projectile) => {
             const enemy = ghost as EnemyGhost;
-            const proj = projectile as KineticBullet;
-            enemy.applyDamage(20);
-        });
-        this.enemy = new EnemyGhost(this, 20, 20, 'ghost');
-
-        // passing damage to one enemy
-        this.physics.add.overlap(this.enemy, this.kineticBulletGroup, (ghost, projectile) => {
-            const enemy = ghost as EnemyGhost;
             const kineticProjectile = projectile as KineticBullet;
             enemy.applyDamage(kineticProjectile.damage);
             kineticProjectile.destroy();
-            console.log('enemy hit');
         });
+
+        this.physics.add.collider(this.enemyGhostGroup, this.platforms);
     }
     update() {
         this.playerControls.handleControls();
@@ -269,7 +263,6 @@ export class Level01 extends Scene {
             const y = Math.random() * 1000;
 
             const enemy = new EnemyGhost(this, x, y, 'ghost');
-
             this.enemyGhostGroup.add(enemy);
         }
     }
