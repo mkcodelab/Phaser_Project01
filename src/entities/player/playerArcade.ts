@@ -1,8 +1,9 @@
-import { Physics } from 'phaser';
+import { Physics, Scene } from 'phaser';
 import { PlayerResources } from '../resources/resources';
 import { Weapon, blaster, fireball, minigun, rifle } from '../weapons/weapon01';
 
 import { Events } from 'phaser';
+import { Level01 } from '../../scenes/level_01';
 
 export const playerEvents = new Events.EventEmitter();
 
@@ -20,7 +21,7 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
 
     canShoot = true;
 
-    constructor(public scene: any, x = 0, y = 0, texture = 'gumiak') {
+    constructor(public scene: Level01, x = 0, y = 0, texture = 'gumiak') {
         super(scene, x, y, texture);
         scene.add.existing(this);
         scene.physics.add.existing(this);
@@ -43,8 +44,9 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
                 this.scene.fireBullet(
                     this.currentWeapon.ammunitionType,
                     this.currentWeapon.recoil,
-                    this.currentWeapon.sound,
-                    this.currentWeapon.bulletSpeed ?? undefined
+                    this.currentWeapon.sound || '',
+                    this.currentWeapon.baseDamage,
+                    this.currentWeapon.bulletSpeed
                 );
                 this.currentWeapon.ammunitionQuantity--;
 

@@ -2,6 +2,8 @@ import { Physics, Scene, Math as P_Math } from 'phaser';
 
 export type Bullet = 'default' | 'energy' | 'laser' | 'kinetic';
 
+export type BulletClassType = KineticBullet | EnergyBullet | DefaultBullet;
+
 export type DirVector = {
     x: number;
     y: number;
@@ -11,6 +13,7 @@ export class DefaultBullet extends Physics.Arcade.Sprite {
     speed: number;
     angleBetweenShooter: number;
     spriteAngle: number;
+    damage: number;
     constructor(scene: Scene, x: number, y: number, textureName: string = 'bullet') {
         super(scene, x, y, textureName);
 
@@ -21,7 +24,7 @@ export class DefaultBullet extends Physics.Arcade.Sprite {
         this.speed = 700;
     }
 
-    fire(shooter: DirVector, target: DirVector, bulletSpeed?: number) {
+    fire(shooter: DirVector, target: DirVector, bulletDamage: number, bulletSpeed?: number) {
         this.setPosition(shooter.x, shooter.y);
         // returns angle in radians
         this.angleBetweenShooter = P_Math.Angle.BetweenPoints(shooter, target);
@@ -31,6 +34,7 @@ export class DefaultBullet extends Physics.Arcade.Sprite {
             bulletSpeed ?? this.speed,
             this.body?.velocity
         );
+        this.damage = bulletDamage;
     }
 }
 
@@ -40,8 +44,8 @@ export class KineticBullet extends DefaultBullet {
 
         // this.speed = 900;
     }
-    fire(shooter: DirVector, target: DirVector, bulletSpeed?: number) {
-        super.fire(shooter, target, bulletSpeed);
+    fire(shooter: DirVector, target: DirVector, bulletDamage: number, bulletSpeed?: number) {
+        super.fire(shooter, target, bulletDamage, bulletSpeed);
         // change radians to degrees
         const projectileAngle = P_Math.RadToDeg(this.angleBetweenShooter);
         // rotate sprite to the target

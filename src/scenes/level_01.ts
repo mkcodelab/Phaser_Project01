@@ -4,7 +4,10 @@ import { PlayerArcade } from '../entities/player/playerArcade';
 import { PlayerControlsArcade } from '../entities/player/playerControlsArcade';
 import {
     Bullet,
+    BulletClassType,
+    DefaultBullet,
     DefaultBulletGroup,
+    EnergyBullet,
     EnergyBulletGroup,
     KineticBullet,
     KineticBulletGroup,
@@ -151,11 +154,12 @@ export class Level01 extends Scene {
         });
         this.enemy = new EnemyGhost(this, 20, 20, 'ghost');
 
+        // EUREKA!
         this.physics.add.overlap(this.enemy, this.kineticBulletGroup, (ghost, projectile) => {
             const enemy = ghost as EnemyGhost;
-            const proj = projectile as KineticBullet;
-            enemy.applyDamage(20);
-            proj.destroy();
+            const kineticProjectile = projectile as KineticBullet;
+            enemy.applyDamage(kineticProjectile.damage);
+            kineticProjectile.destroy();
             console.log('enemy hit');
         });
     }
@@ -202,7 +206,8 @@ export class Level01 extends Scene {
 
         // this.events.emit('fire');
 
-        let bullet: any;
+        let bullet: BulletClassType | undefined = undefined;
+
         switch (bulletType) {
             case 'default':
                 bullet = this.bulletGroup.get().setActive(true).setVisible(true);
@@ -212,6 +217,7 @@ export class Level01 extends Scene {
                 break;
             case 'energy':
                 bullet = this.energyBulletGroup.get().setActive(true).setVisible(true);
+                break;
         }
 
         if (bullet) {
