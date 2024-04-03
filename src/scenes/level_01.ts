@@ -154,7 +154,7 @@ export class Level01 extends Scene {
         });
         this.enemy = new EnemyGhost(this, 20, 20, 'ghost');
 
-        // EUREKA!
+        // passing damage to one enemy
         this.physics.add.overlap(this.enemy, this.kineticBulletGroup, (ghost, projectile) => {
             const enemy = ghost as EnemyGhost;
             const kineticProjectile = projectile as KineticBullet;
