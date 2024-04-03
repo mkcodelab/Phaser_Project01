@@ -1,4 +1,4 @@
-import { Scene, Sound, GameObjects } from 'phaser';
+import { Scene, Sound, GameObjects, Physics } from 'phaser';
 import { CENTER } from '..';
 import { PlayerArcade } from '../entities/player/playerArcade';
 import { PlayerControlsArcade } from '../entities/player/playerControlsArcade';
@@ -6,9 +6,11 @@ import {
     Bullet,
     DefaultBulletGroup,
     EnergyBulletGroup,
+    KineticBullet,
     KineticBulletGroup,
 } from '../entities/projectiles/defaultBullet';
 import { BaseCollectible, BaseCollectibleGroup } from '../entities/resources/collectibles/collectible';
+import { EnemyGhost } from '../entities/enemies/enemyGhost';
 
 type AudioSound = Sound.HTML5AudioSound | Sound.WebAudioSound | Sound.NoAudioSound;
 
@@ -45,6 +47,9 @@ export class Level01 extends Scene {
     weaponSwitchSfx: AudioSound;
 
     bellSfx: AudioSound;
+
+    enemy: EnemyGhost;
+    enemyGhostGroup: Physics.Arcade.Group;
 
     preload() {
         this.load.image('background', 'assets/Starfield-7.png');
@@ -104,7 +109,7 @@ export class Level01 extends Scene {
         this.defaultCollectibleGroup = new BaseCollectibleGroup(this);
         this.addCollectiblesToGroup(this.defaultCollectibleGroup, 20);
         // this.defaultCollectibleGroup.spreadRandomly();
-        console.log(this.defaultCollectibleGroup.children);
+        // console.log(this.defaultCollectibleGroup.children);
 
         this.physics.add.collider(this.defaultCollectibleGroup, this.platforms);
 
@@ -131,7 +136,28 @@ export class Level01 extends Scene {
         });
 
         this.player.resources.addResource('lightPoints', 20);
-        console.log(this.player.resources.getResource('lightPoints'));
+        // console.log(this.player.resources.getResource('lightPoints'));
+
+        // enemies
+
+        this.enemyGhostGroup = this.physics.add.group();
+
+        this.addEnemies();
+
+        this.physics.add.overlap(this.enemyGhostGroup, this.kineticBulletGroup, (ghost, projectile) => {
+            const enemy = ghost as EnemyGhost;
+            const proj = projectile as KineticBullet;
+            enemy.applyDamage(20);
+        });
+        this.enemy = new EnemyGhost(this, 20, 20, 'ghost');
+
+        this.physics.add.overlap(this.enemy, this.kineticBulletGroup, (ghost, projectile) => {
+            const enemy = ghost as EnemyGhost;
+            const proj = projectile as KineticBullet;
+            enemy.applyDamage(20);
+            proj.destroy();
+            console.log('enemy hit');
+        });
     }
     update() {
         this.playerControls.handleControls();
@@ -164,7 +190,13 @@ export class Level01 extends Scene {
         }
     }
 
-    fireBullet(bulletType: Bullet, shakeIntensity = 0.001, bulletSound: string, bulletSpeed?: number) {
+    fireBullet(
+        bulletType: Bullet,
+        shakeIntensity = 0.001,
+        bulletSound: string,
+        bulletDamage: number,
+        bulletSpeed?: number
+    ) {
         // this.cameras.main.shake(time, intensity)
         this.cameras.main.shake(200, shakeIntensity);
 
@@ -187,7 +219,7 @@ export class Level01 extends Scene {
             // x, y coordinates of pointer in world space
             const target = { x: this.input.activePointer.worldX, y: this.input.activePointer.worldY };
 
-            bullet.fire(shooter, target, bulletSpeed);
+            bullet.fire(shooter, target, bulletDamage, bulletSpeed);
             this.playBulletSound(bulletSound);
         }
     }
@@ -222,6 +254,17 @@ export class Level01 extends Scene {
             if (group) {
                 group.add(collectible);
             }
+        }
+    }
+
+    addEnemies() {
+        for (let i = 0; i < 20; i++) {
+            const x = Math.random() * 1000;
+            const y = Math.random() * 1000;
+
+            const enemy = new EnemyGhost(this, x, y, 'ghost');
+
+            this.enemyGhostGroup.add(enemy);
         }
     }
 }

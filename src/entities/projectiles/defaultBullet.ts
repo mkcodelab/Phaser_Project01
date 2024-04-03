@@ -35,7 +35,7 @@ export class DefaultBullet extends Physics.Arcade.Sprite {
 }
 
 export class KineticBullet extends DefaultBullet {
-    constructor(scene: Scene, x: number, y: number, textureName: string = 'kinematicBullet') {
+    constructor(scene: Scene, x: number, y: number, textureName: string = 'kineticBullet') {
         super(scene, x, y, textureName);
 
         // this.speed = 900;

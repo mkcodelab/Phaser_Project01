@@ -1,13 +1,24 @@
-import { Physics } from 'phaser';
+import { Physics, Scene } from 'phaser';
 
 export class EnemyGhost extends Physics.Arcade.Sprite {
-    constructor(public scene: any, x = 0, y = 0, texture = 'ghost') {
+    health = 100;
+    currentHealth = 100;
+
+    constructor(public scene: Scene, x = 0, y = 0, texture = 'ghost') {
         super(scene, x, y, texture);
         scene.add.existing(this);
         scene.physics.add.existing(this);
 
-        // this.scene = scene;
+        //@ts-ignored
+        this.body.setAllowGravity(false);
+    }
 
-        // this.resources = new PlayerResources();
+    applyDamage(value: number) {
+        this.currentHealth -= value;
+        console.log('ouch', value, 'remaining: ', this.currentHealth);
+        if (this.currentHealth <= 0) {
+            //maybe pool them instead
+            this.destroy();
+        }
     }
 }
