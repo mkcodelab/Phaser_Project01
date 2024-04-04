@@ -5,9 +5,7 @@ import { PlayerControlsArcade } from '../entities/player/playerControlsArcade';
 import {
     Bullet,
     BulletClassType,
-    DefaultBullet,
     DefaultBulletGroup,
-    EnergyBullet,
     EnergyBulletGroup,
     KineticBullet,
     KineticBulletGroup,
@@ -31,7 +29,7 @@ export class Level01 extends Scene {
 
     playerControls: PlayerControlsArcade;
 
-    ambientLightColor = 0x444444;
+    ambientLightColor = 0x333333;
     light: GameObjects.Light;
 
     // groups
@@ -73,14 +71,7 @@ export class Level01 extends Scene {
     }
     create() {
         this.input.setDefaultCursor('url(assets/crosshair.png), pointer');
-
-        this.pistolSfx = this.sound.add('pistol');
-        this.rifleSfx = this.sound.add('rifle');
-        this.shotgunSfx = this.sound.add('shotgun');
-        this.minigunSfx = this.sound.add('minigun');
-        this.weaponSwitchSfx = this.sound.add('weaponSwitch');
-
-        this.bellSfx = this.sound.add('bell');
+        this.initSFX();
 
         this.backgroundImage = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
         // static group
@@ -90,7 +81,7 @@ export class Level01 extends Scene {
         this.createFloor();
 
         this.lights.enable().setAmbientColor(this.ambientLightColor);
-        this.light = this.lights.addLight(100, 100, 128).setIntensity(3);
+        // this.light = this.lights.addLight(100, 100, 128).setIntensity(3);
 
         // player
         this.player = new PlayerArcade(this, 20, 20, 'gumiak');
@@ -161,10 +152,6 @@ export class Level01 extends Scene {
         this.playerControls.handleControls();
         this.playerControls.handleMouseInput();
         this.playerControls.handleWeaponSwitch();
-
-        // move to player
-        this.light.x = this.player.x;
-        this.light.y = this.player.y;
     }
 
     createPlatforms(quantity: number) {
@@ -177,8 +164,7 @@ export class Level01 extends Scene {
             this.platforms
                 .create(coords.x, coords.y, 'ground')
                 .setPipeline('Light2D')
-                .setScale(Math.random() * 2 + 0.5)
-
+                .setScale(Math.random() * 2 + 0.8)
                 .refreshBody();
         }
     }
@@ -265,5 +251,14 @@ export class Level01 extends Scene {
             const enemy = new EnemyGhost(this, x, y, 'ghost');
             this.enemyGhostGroup.add(enemy);
         }
+    }
+
+    initSFX() {
+        this.pistolSfx = this.sound.add('pistol');
+        this.rifleSfx = this.sound.add('rifle');
+        this.shotgunSfx = this.sound.add('shotgun');
+        this.minigunSfx = this.sound.add('minigun');
+        this.weaponSwitchSfx = this.sound.add('weaponSwitch');
+        this.bellSfx = this.sound.add('bell');
     }
 }

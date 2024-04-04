@@ -12,6 +12,7 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
     currentHealth = 100;
     sprintSpeed = 260;
     speed = 160;
+    lightIntensity = 3;
 
     resources: PlayerResources;
 
@@ -35,6 +36,15 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
         this.addWeapon(fireball);
 
         this.currentWeapon = this.weaponsHotbar[0];
+
+        scene.light = scene.lights.addLight(100, 100, 128).setIntensity(this.lightIntensity);
+    }
+
+    protected preUpdate(time: number, delta: number): void {
+        super.preUpdate(time, delta);
+
+        this.scene.light.x = this.x;
+        this.scene.light.y = this.y;
     }
 
     shoot() {
