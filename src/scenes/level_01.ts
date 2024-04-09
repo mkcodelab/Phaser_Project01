@@ -12,13 +12,18 @@ import {
 } from '../entities/projectiles/defaultBullet';
 import { BaseCollectible, BaseCollectibleGroup } from '../entities/resources/collectibles/collectible';
 import { EnemyGhost } from '../entities/enemies/enemyGhost';
+import { Explosion } from '../entities/vfx/explosion/explosion';
+import { Preloader } from './ui/preloader';
 
 type AudioSound = Sound.HTML5AudioSound | Sound.WebAudioSound | Sound.NoAudioSound;
 
 export class Level01 extends Scene {
     constructor() {
         super('level01');
+        this.preloader = new Preloader(this);
     }
+
+    preloader: Preloader;
 
     backgroundImage: GameObjects.Image;
     platforms: Phaser.Physics.Arcade.StaticGroup;
@@ -52,23 +57,10 @@ export class Level01 extends Scene {
     enemyGhostGroup: Physics.Arcade.Group;
 
     preload() {
-        this.load.image('background', 'assets/Starfield-7.png');
-        this.load.image('ground', 'assets/ground.png');
-        this.load.image('gumiak', 'assets/gumiak.png');
-        this.load.image('ghost', 'assets/ghost.png');
-        this.load.image('bullet', 'assets/bullet.png');
-        this.load.image('kineticBullet', 'assets/kineticBullet.png');
-        this.load.image('energyBullet', 'assets/energyBullet.png');
-        this.load.image('crosshair', 'assets/crosshair.png');
-        this.load.image('defaultCollectible', 'assets/defaultCollectible.png');
-
-        this.load.audio('pistol', 'assets/audio/pistol.ogg');
-        this.load.audio('rifle', 'assets/audio/rifle.ogg');
-        this.load.audio('shotgun', 'assets/audio/shotgun.ogg');
-        this.load.audio('minigun', 'assets/audio/minigun.ogg');
-        this.load.audio('weaponSwitch', 'assets/audio/weapswitch.ogg');
-        this.load.audio('bell', 'assets/audio/bell_02.ogg');
+        this.preloader.loadImages();
+        this.preloader.loadAudio();
     }
+
     create() {
         this.input.setDefaultCursor('url(assets/crosshair.png), pointer');
         this.initSFX();
@@ -120,8 +112,18 @@ export class Level01 extends Scene {
         // this.defaultCollectibleGroup.createFromConfig()
 
         // destroy bullets on contact
+        //  as Physics.Arcade.GameObjectWithBody
         this.physics.add.collider(this.platforms, this.bulletGroup, (platforms, projectile) => {
             projectile.destroy();
+
+            // @ts-ignore
+            const explosion = new Explosion(this, projectile.x, projectile.y);
+
+            // const proj = projectile as Phaser.Types.Physics.Arcade.GameObjectWithBody;
+
+            // @ts-ignore
+            // const explosion = new Explosion(this, proj.x, proj.y);
+            // console.log(proj.x, proj.y);
         });
 
         this.physics.add.collider(this.platforms, this.kineticBulletGroup, (platforms, projectile) => {
