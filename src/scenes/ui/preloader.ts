@@ -25,6 +25,7 @@ const audio = [
     new AudioAsset('minigun', 'minigun.ogg'),
     new AudioAsset('weaponSwitch', 'weapswitch.ogg'),
     new AudioAsset('bell', 'bell_02.ogg'),
+    new AudioAsset('explosion', 'explosion.ogg'),
 ];
 
 const images = [

@@ -1,5 +1,6 @@
 import { Scene, Input } from 'phaser';
 import { PlayerArcade } from './playerArcade';
+import { Events } from 'phaser';
 
 type Key = Input.Keyboard.Key | undefined;
 
@@ -17,6 +18,8 @@ interface WeaponSlotKeys {
     slot2: Key;
     slot3: Key;
 }
+
+export const controlsEvents = new Events.EventEmitter();
 
 export class PlayerControlsArcade {
     currentSpeed: number;
@@ -60,6 +63,10 @@ export class PlayerControlsArcade {
         }
         if (this.controlKeys.jump!.isDown && (this.player.body!.touching.down || this.isOnWall)) {
             this.player.setVelocityY(-330);
+        }
+
+        if (Input.Keyboard.JustDown(this.controlKeys.inventory!)) {
+            controlsEvents.emit('inventoryToggle');
         }
     }
 

@@ -1,5 +1,6 @@
 import { GameObjects, Scene } from 'phaser';
 import { playerEvents } from '../../entities/player/playerArcade';
+import { controlsEvents } from '../../entities/player/playerControlsArcade';
 
 interface HudProperties {
     currentWeapon: GameObjects.Text;
@@ -12,6 +13,10 @@ export class HUD extends Scene implements HudProperties {
     playerHealth: GameObjects.Text;
     ammo: GameObjects.Text;
 
+    inventoryOpen = false;
+
+    inventory: GameObjects.Text;
+
     constructor() {
         super({ key: 'hud', active: true });
     }
@@ -23,8 +28,12 @@ export class HUD extends Scene implements HudProperties {
         this.playerHealth = this.add.text(20, 40, 'health: ');
         this.ammo = this.add.text(20, 60, 'ammo: ');
 
+        this.inventory = this.add.text(20, 80, 'inventory');
+        this.inventory.visible = this.inventoryOpen;
+
         playerEvents.on('ammo', this.updateAmmoCount, this);
         playerEvents.on('currentWeapon', this.updateCurrentWeapon, this);
+        controlsEvents.on('inventoryToggle', this.toggleInventory, this);
     }
 
     updateAmmoCount(value: number) {
@@ -35,9 +44,9 @@ export class HUD extends Scene implements HudProperties {
         this.currentWeapon.text = 'weapon: ' + weaponName;
     }
 
-    // changeValue(property: , value) {
-    //     if (this.hasOwnProperty(property)) {
-    //         this[property] = value
-    //     }
-    // }
+    toggleInventory() {
+        console.log('inventory toggled');
+        this.inventoryOpen = !this.inventoryOpen;
+        this.inventory.setVisible(this.inventoryOpen);
+    }
 }

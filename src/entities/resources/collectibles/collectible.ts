@@ -1,10 +1,18 @@
 import { Physics, Scene } from 'phaser';
 import { TResource } from '../resources';
+import { PlayerArcade } from '../../player/playerArcade';
 
 export class BaseCollectible extends Physics.Arcade.Sprite {
     quantity: number;
     resourceType: TResource;
-    constructor(scene: any, x: number, y: number, texture: string, resourceType: TResource) {
+    constructor(
+        scene: any,
+        public player: PlayerArcade,
+        x: number,
+        y: number,
+        texture: string,
+        resourceType: TResource
+    ) {
         super(scene, x, y, texture);
         this.resourceType = resourceType;
         scene.add.existing(this);
@@ -15,7 +23,7 @@ export class BaseCollectible extends Physics.Arcade.Sprite {
     }
 
     collect() {
-        console.log('collected');
+        this.player.resources.addResource('crystals', 1);
         this.destroy();
     }
 }

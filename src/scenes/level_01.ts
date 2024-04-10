@@ -5,6 +5,7 @@ import { PlayerControlsArcade } from '../entities/player/playerControlsArcade';
 import {
     Bullet,
     BulletClassType,
+    DefaultBullet,
     DefaultBulletGroup,
     EnergyBulletGroup,
     KineticBullet,
@@ -53,27 +54,31 @@ export class Level01 extends Scene {
     weaponSwitchSfx: AudioSound;
 
     bellSfx: AudioSound;
+    explosionSfx: AudioSound;
 
     enemyGhostGroup: Physics.Arcade.Group;
 
     preload() {
         this.preloader.loadImages();
         this.preloader.loadAudio();
+
+        this.load.spritesheet('explosion', 'assets/boom3.png', { frameWidth: 128, frameHeight: 128 });
     }
 
     create() {
         this.input.setDefaultCursor('url(assets/crosshair.png), pointer');
+
+        this.initAnimations();
         this.initSFX();
 
         this.backgroundImage = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
-        // static group
+        // platforms static group
         this.platforms = this.physics.add.staticGroup();
 
         this.createPlatforms(this.platformsCount);
         this.createFloor();
 
         this.lights.enable().setAmbientColor(this.ambientLightColor);
-        // this.light = this.lights.addLight(100, 100, 128).setIntensity(3);
 
         // player
         this.player = new PlayerArcade(this, 20, 20, 'gumiak');
@@ -93,8 +98,6 @@ export class Level01 extends Scene {
         // collectible group
         this.defaultCollectibleGroup = new BaseCollectibleGroup(this);
         this.addCollectiblesToGroup(this.defaultCollectibleGroup, 20);
-        // this.defaultCollectibleGroup.spreadRandomly();
-        // console.log(this.defaultCollectibleGroup.children);
 
         this.physics.add.collider(this.defaultCollectibleGroup, this.platforms);
 
@@ -102,28 +105,18 @@ export class Level01 extends Scene {
             // is this the way?
             const col = collectible as BaseCollectible;
             col.collect();
-            // collectible.destroy();
-            this.player.resources.addResource('crystals', 1);
-            this.player.addAmmunition(20);
-            // console.log(this.player.resources.getResource('crystals'));
+
             this.bellSfx.play();
         });
 
-        // this.defaultCollectibleGroup.createFromConfig()
-
-        // destroy bullets on contact
-        //  as Physics.Arcade.GameObjectWithBody
+        // destroy bullets on contact, add explosion
         this.physics.add.collider(this.platforms, this.bulletGroup, (platforms, projectile) => {
             projectile.destroy();
 
-            // @ts-ignore
-            const explosion = new Explosion(this, projectile.x, projectile.y);
-
-            // const proj = projectile as Phaser.Types.Physics.Arcade.GameObjectWithBody;
-
-            // @ts-ignore
-            // const explosion = new Explosion(this, proj.x, proj.y);
-            // console.log(proj.x, proj.y);
+            const proj = projectile as DefaultBullet;
+            const explosion = new Explosion(this, proj.x, proj.y);
+            this.explosionSfx.play();
+            this.cameras.main.shake(200, 0.002);
         });
 
         this.physics.add.collider(this.platforms, this.kineticBulletGroup, (platforms, projectile) => {
@@ -131,10 +124,8 @@ export class Level01 extends Scene {
         });
 
         this.player.resources.addResource('lightPoints', 20);
-        // console.log(this.player.resources.getResource('lightPoints'));
 
         // enemies
-
         this.enemyGhostGroup = this.physics.add.group({
             allowGravity: false,
         });
@@ -186,8 +177,6 @@ export class Level01 extends Scene {
         // this.cameras.main.shake(time, intensity)
         this.cameras.main.shake(200, shakeIntensity);
 
-        // this.events.emit('fire');
-
         let bullet: BulletClassType | undefined = undefined;
 
         switch (bulletType) {
@@ -237,7 +226,7 @@ export class Level01 extends Scene {
             const x = Math.random() * 1000;
             const y = Math.random() * 1000;
 
-            const collectible = new BaseCollectible(this, x, y, 'defaultCollectible', 'crystals');
+            const collectible = new BaseCollectible(this, this.player, x, y, 'defaultCollectible', 'crystals');
 
             if (group) {
                 group.add(collectible);
@@ -262,5 +251,16 @@ export class Level01 extends Scene {
         this.minigunSfx = this.sound.add('minigun');
         this.weaponSwitchSfx = this.sound.add('weaponSwitch');
         this.bellSfx = this.sound.add('bell');
+        this.explosionSfx = this.sound.add('explosion');
+    }
+
+    initAnimations() {
+        // test spritesheet animation
+        this.anims.create({
+            key: 'explode',
+            frames: 'explosion',
+            frameRate: 60,
+            repeat: 0,
+        });
     }
 }
