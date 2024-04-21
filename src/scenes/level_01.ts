@@ -13,8 +13,9 @@ import {
 } from '../entities/projectiles/defaultBullet';
 import { BaseCollectible, BaseCollectibleGroup } from '../entities/resources/collectibles/collectible';
 import { EnemyGhost } from '../entities/enemies/enemyGhost';
-import { Explosion } from '../entities/vfx/explosion/explosion';
+import { Explosion, ExplosionsGroup } from '../entities/vfx/explosion/explosion';
 import { Preloader } from './ui/preloader';
+import { SfxManager } from '../managers/audioManagers/sfxManager';
 
 type AudioSound = Sound.HTML5AudioSound | Sound.WebAudioSound | Sound.NoAudioSound;
 
@@ -22,16 +23,19 @@ export class Level01 extends Scene {
     constructor() {
         super('level01');
         this.preloader = new Preloader(this);
+
+        this.sfxManager = new SfxManager(this);
     }
 
     preloader: Preloader;
+    sfxManager: SfxManager;
 
     backgroundImage: GameObjects.Image;
     platforms: Phaser.Physics.Arcade.StaticGroup;
     platformsCount = 200;
     player: PlayerArcade;
 
-    cursors: any;
+    // cursors: any;
 
     playerControls: PlayerControlsArcade;
 
@@ -44,34 +48,32 @@ export class Level01 extends Scene {
     energyBulletGroup: EnergyBulletGroup;
     defaultCollectibleGroup: BaseCollectibleGroup;
 
-    // audio
-
-    pistolSfx: AudioSound;
-    rifleSfx: AudioSound;
-    shotgunSfx: AudioSound;
-    minigunSfx: AudioSound;
-
-    weaponSwitchSfx: AudioSound;
-
-    bellSfx: AudioSound;
-    explosionSfx: AudioSound;
+    explosionsGroup: ExplosionsGroup;
 
     enemyGhostGroup: Physics.Arcade.Group;
+    piesel: any;
 
     preload() {
         this.preloader.loadImages();
         this.preloader.loadAudio();
 
         this.load.spritesheet('explosion', 'assets/boom3.png', { frameWidth: 128, frameHeight: 128 });
+
+        this.load.spritesheet('piesel', 'assets/pieselspritesheet.png', { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
         this.input.setDefaultCursor('url(assets/crosshair.png), pointer');
 
-        this.initAnimations();
-        this.initSFX();
-
         this.backgroundImage = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
+
+        this.piesel = this.add.sprite(50, 50, 'piesel');
+
+        this.initAnimations();
+        this.sfxManager.initSFX();
+
+        this.piesel.play('pieselrun');
+
         // platforms static group
         this.platforms = this.physics.add.staticGroup();
 
@@ -95,6 +97,8 @@ export class Level01 extends Scene {
         this.kineticBulletGroup = new KineticBulletGroup(this);
         this.energyBulletGroup = new EnergyBulletGroup(this);
 
+        this.explosionsGroup = new ExplosionsGroup(this);
+
         // collectible group
         this.defaultCollectibleGroup = new BaseCollectibleGroup(this);
         this.addCollectiblesToGroup(this.defaultCollectibleGroup, 20);
@@ -102,11 +106,9 @@ export class Level01 extends Scene {
         this.physics.add.collider(this.defaultCollectibleGroup, this.platforms);
 
         this.physics.add.overlap(this.defaultCollectibleGroup, this.player, (player, collectible) => {
-            // is this the way?
             const col = collectible as BaseCollectible;
             col.collect();
-
-            this.bellSfx.play();
+            this.sfxManager.playSound('bellSfx');
         });
 
         // destroy bullets on contact, add explosion
@@ -114,16 +116,14 @@ export class Level01 extends Scene {
             projectile.destroy();
 
             const proj = projectile as DefaultBullet;
-            const explosion = new Explosion(this, proj.x, proj.y);
-            this.explosionSfx.play();
-            this.cameras.main.shake(200, 0.002);
+            this.createExplosion(proj.x, proj.y);
         });
 
         this.physics.add.collider(this.platforms, this.kineticBulletGroup, (platforms, projectile) => {
             projectile.destroy();
         });
 
-        this.player.resources.addResource('lightPoints', 20);
+        // this.player.resources.addResource('lightPoints', 20);
 
         // enemies
         this.enemyGhostGroup = this.physics.add.group({
@@ -131,6 +131,20 @@ export class Level01 extends Scene {
         });
 
         this.addEnemies();
+
+        this.physics.add.overlap(this.explosionsGroup, this.enemyGhostGroup, (explosion, enemy) => {
+            const ghost = enemy as EnemyGhost;
+            ghost.setTint(0xff0000);
+            ghost.applyDamage(200);
+        });
+
+        this.physics.add.overlap(this.enemyGhostGroup, this.bulletGroup, (ghost, projectile) => {
+            const enemy = ghost as EnemyGhost;
+            const defaultProjectile = projectile as DefaultBullet;
+            enemy.applyDamage(defaultProjectile.damage);
+            this.createExplosion(defaultProjectile.x, defaultProjectile.y);
+            defaultProjectile.destroy();
+        });
 
         this.physics.add.overlap(this.enemyGhostGroup, this.kineticBulletGroup, (ghost, projectile) => {
             const enemy = ghost as EnemyGhost;
@@ -141,12 +155,12 @@ export class Level01 extends Scene {
 
         this.physics.add.collider(this.enemyGhostGroup, this.platforms);
     }
+
     update() {
-        this.playerControls.handleControls();
-        this.playerControls.handleMouseInput();
-        this.playerControls.handleWeaponSwitch();
+        this.playerControls.handlePlayerInput();
     }
 
+    // move to world generator
     createPlatforms(quantity: number) {
         for (let i = 0; i < quantity; i++) {
             const coords = {
@@ -181,13 +195,13 @@ export class Level01 extends Scene {
 
         switch (bulletType) {
             case 'default':
-                bullet = this.bulletGroup.get().setActive(true).setVisible(true);
+                bullet = this.bulletGroup.get().setActive(true).setVisible(true).setCircle(5, 3, 3);
                 break;
             case 'kinetic':
-                bullet = this.kineticBulletGroup.get().setActive(true).setVisible(true);
+                bullet = this.kineticBulletGroup.get().setActive(true).setVisible(true).setCircle(4, 2, 2);
                 break;
             case 'energy':
-                bullet = this.energyBulletGroup.get().setActive(true).setVisible(true);
+                bullet = this.energyBulletGroup.get().setActive(true).setVisible(true).setCircle(10, 5, 5);
                 break;
         }
 
@@ -197,27 +211,7 @@ export class Level01 extends Scene {
             const target = { x: this.input.activePointer.worldX, y: this.input.activePointer.worldY };
 
             bullet.fire(shooter, target, bulletDamage, bulletSpeed);
-            this.playBulletSound(bulletSound);
-        }
-    }
-
-    playBulletSound(bulletSound: string) {
-        switch (bulletSound) {
-            case 'pistol':
-                this.pistolSfx.play();
-                break;
-            case 'rifle':
-                this.rifleSfx.play();
-                break;
-            case 'shotgun':
-                this.shotgunSfx.play();
-                break;
-            case 'minigun':
-                this.minigunSfx.play();
-                break;
-            default:
-                this.weaponSwitchSfx.play();
-                break;
+            this.sfxManager.playBulletSound(bulletSound);
         }
     }
 
@@ -244,23 +238,29 @@ export class Level01 extends Scene {
         }
     }
 
-    initSFX() {
-        this.pistolSfx = this.sound.add('pistol');
-        this.rifleSfx = this.sound.add('rifle');
-        this.shotgunSfx = this.sound.add('shotgun');
-        this.minigunSfx = this.sound.add('minigun');
-        this.weaponSwitchSfx = this.sound.add('weaponSwitch');
-        this.bellSfx = this.sound.add('bell');
-        this.explosionSfx = this.sound.add('explosion');
-    }
-
     initAnimations() {
-        // test spritesheet animation
         this.anims.create({
             key: 'explode',
             frames: 'explosion',
             frameRate: 60,
             repeat: 0,
         });
+
+        this.anims.create({
+            key: 'pieselrun',
+            frames: 'piesel',
+            frameRate: 10,
+            repeat: -1,
+        });
+    }
+
+    createExplosion(x: number, y: number): void {
+        // const explosion = new Explosion(this, x, y, 40);
+        const explosion = this.explosionsGroup.get();
+        explosion.body.allowGravity = false;
+        explosion.setActive(true).setVisible(true).setPosition(x, y).setCircle(40, 16, 64);
+        this.sfxManager.playSound('explosionSfx');
+
+        this.cameras.main.shake(200, 0.002);
     }
 }

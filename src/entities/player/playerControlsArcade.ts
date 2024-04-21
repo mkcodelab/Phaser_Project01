@@ -1,4 +1,4 @@
-import { Scene, Input } from 'phaser';
+import { Scene, Input, Math as PMath } from 'phaser';
 import { PlayerArcade } from './playerArcade';
 import { Events } from 'phaser';
 
@@ -60,6 +60,8 @@ export class PlayerControlsArcade {
             this.player.flipX = false;
         } else {
             this.player.setVelocityX(0);
+            // this.player.setVelocityX(PMath.Linear(this.currentSpeed, 0, 0.1));
+            // this.player.setVelocityX(PMath.Interpolation.SmoothStep(0.5, this.currentSpeed, 0));
         }
         if (this.controlKeys.jump!.isDown && (this.player.body!.touching.down || this.isOnWall)) {
             this.player.setVelocityY(-330);
@@ -87,6 +89,12 @@ export class PlayerControlsArcade {
         } else if (Input.Keyboard.JustDown(this.weaponSlotKeys.slot3!)) {
             this.player.switchWeapon(3);
         }
+    }
+
+    handlePlayerInput() {
+        this.handleControls();
+        this.handleMouseInput();
+        this.handleWeaponSwitch();
     }
 
     get isOnWall() {

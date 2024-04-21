@@ -24,6 +24,7 @@ export class EnemyGhost extends Physics.Arcade.Sprite {
         this.currentHealth -= value;
         if (this.currentHealth <= 0) {
             //maybe pool them instead
+            // spawn some items upon death
             this.destroy();
         }
     }

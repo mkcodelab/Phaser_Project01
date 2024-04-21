@@ -8,7 +8,7 @@ interface IResources {
 export type TResource = 'lightPoints' | 'crystals' | 'darkGlobes' | 'greenCrystals';
 
 export class PlayerResources {
-    resources: IResources = {
+    private resources: IResources = {
         lightPoints: 0,
         crystals: 0,
         darkGlobes: 0,

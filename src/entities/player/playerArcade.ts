@@ -1,4 +1,4 @@
-import { Physics, Scene } from 'phaser';
+import { Physics } from 'phaser';
 import { PlayerResources } from '../resources/resources';
 import { Weapon, blaster, fireball, minigun, rifle } from '../weapons/weapon01';
 
@@ -72,7 +72,10 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
     switchWeapon(id: number) {
         // check if index of weapon exist
         if (typeof this.weaponsHotbar[id] !== 'undefined') {
-            this.scene.weaponSwitchSfx.play();
+            this.scene.sfxManager.playSound('weaponSwitchSfx');
+            // maybe this should be injected as dependency
+            // this.sfxManager.playSound('weaponSwitchSfx')
+
             this.currentWeapon = this.weaponsHotbar[id];
             playerEvents.emit('currentWeapon', this.currentWeapon.name);
         }
