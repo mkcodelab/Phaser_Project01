@@ -28,7 +28,8 @@ const config = {
 
 const game = new Game(config);
 const preloader = new Preloader();
-game.scene.add('HUD', new HUD());
 game.scene.add('Level01', new Level01('Level01', preloader));
+game.scene.add('HUD', new HUD());
 
 game.scene.start('Level01');
+game.scene.start('HUD');
