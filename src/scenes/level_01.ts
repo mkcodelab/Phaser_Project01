@@ -65,8 +65,6 @@ export class Level01 extends Scene {
     create() {
         this.input.setDefaultCursor('url(assets/crosshair.png), pointer');
 
-        this.backgroundImage = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
-
         this.piesel = this.add.sprite(50, 50, 'piesel');
 
         this.initAnimations();
@@ -74,86 +72,18 @@ export class Level01 extends Scene {
 
         this.piesel.play('pieselrun');
 
-        // platforms static group
-        this.platforms = this.physics.add.staticGroup();
-
-        this.createPlatforms(this.platformsCount);
-        this.createFloor();
+        this.createWorld();
 
         this.lights.enable().setAmbientColor(this.ambientLightColor);
-
-        // player
-        this.player = new PlayerArcade(this, 20, 20, 'gumiak');
-        this.player.setBounce(0.2);
-        this.playerControls = new PlayerControlsArcade(this, this.player);
-        this.physics.add.collider(this.player, this.platforms);
-
-        // camera follow player
-        this.cameras.main.startFollow(this.player);
-        this.cameras.main.setZoom(2);
-
-        // bullet groups
-        this.bulletGroup = new DefaultBulletGroup(this);
-        this.kineticBulletGroup = new KineticBulletGroup(this);
-        this.energyBulletGroup = new EnergyBulletGroup(this);
-
-        this.explosionsGroup = new ExplosionsGroup(this);
-
-        // collectible group
-        this.defaultCollectibleGroup = new BaseCollectibleGroup(this);
-        this.addCollectiblesToGroup(this.defaultCollectibleGroup, 20);
-
-        this.physics.add.collider(this.defaultCollectibleGroup, this.platforms);
-
-        this.physics.add.overlap(this.defaultCollectibleGroup, this.player, (player, collectible) => {
-            const col = collectible as BaseCollectible;
-            col.collect();
-            this.sfxManager.playSound('bellSfx');
-        });
-
-        // destroy bullets on contact, add explosion
-        this.physics.add.collider(this.platforms, this.bulletGroup, (platforms, projectile) => {
-            projectile.destroy();
-
-            const proj = projectile as DefaultBullet;
-            this.createExplosion(proj.x, proj.y);
-        });
-
-        this.physics.add.collider(this.platforms, this.kineticBulletGroup, (platforms, projectile) => {
-            projectile.destroy();
-        });
-
         // this.player.resources.addResource('lightPoints', 20);
 
-        // enemies
-        this.enemyGhostGroup = this.physics.add.group({
-            allowGravity: false,
-        });
+        // player
+        this.initPlayer();
 
-        this.addEnemies();
-
-        this.physics.add.overlap(this.explosionsGroup, this.enemyGhostGroup, (explosion, enemy) => {
-            const ghost = enemy as EnemyGhost;
-            ghost.setTint(0xff0000);
-            ghost.applyDamage(200);
-        });
-
-        this.physics.add.overlap(this.enemyGhostGroup, this.bulletGroup, (ghost, projectile) => {
-            const enemy = ghost as EnemyGhost;
-            const defaultProjectile = projectile as DefaultBullet;
-            enemy.applyDamage(defaultProjectile.damage);
-            this.createExplosion(defaultProjectile.x, defaultProjectile.y);
-            defaultProjectile.destroy();
-        });
-
-        this.physics.add.overlap(this.enemyGhostGroup, this.kineticBulletGroup, (ghost, projectile) => {
-            const enemy = ghost as EnemyGhost;
-            const kineticProjectile = projectile as KineticBullet;
-            enemy.applyDamage(kineticProjectile.damage);
-            kineticProjectile.destroy();
-        });
-
-        this.physics.add.collider(this.enemyGhostGroup, this.platforms);
+        // groups
+        this.initGroups();
+        // after group exists, we can add coliders to it
+        this.initPhysics();
     }
 
     update() {
@@ -262,5 +192,88 @@ export class Level01 extends Scene {
         this.sfxManager.playSound('explosionSfx');
 
         this.cameras.main.shake(200, 0.002);
+    }
+
+    initPlayer() {
+        this.player = new PlayerArcade(this, 20, 20, 'gumiak');
+        this.player.setBounce(0.2);
+        this.playerControls = new PlayerControlsArcade(this, this.player);
+        this.physics.add.collider(this.player, this.platforms);
+
+        // camera follow player
+        this.cameras.main.startFollow(this.player);
+        this.cameras.main.setZoom(2);
+    }
+
+    initGroups() {
+        // bullet groups
+        this.bulletGroup = new DefaultBulletGroup(this);
+        this.kineticBulletGroup = new KineticBulletGroup(this);
+        this.energyBulletGroup = new EnergyBulletGroup(this);
+        this.explosionsGroup = new ExplosionsGroup(this);
+        // collectible group
+        this.defaultCollectibleGroup = new BaseCollectibleGroup(this);
+        this.addCollectiblesToGroup(this.defaultCollectibleGroup, 20);
+
+        // enemies
+        this.enemyGhostGroup = this.physics.add.group({
+            allowGravity: false,
+        });
+
+        this.addEnemies();
+    }
+
+    initPhysics() {
+        this.physics.add.collider(this.defaultCollectibleGroup, this.platforms);
+
+        this.physics.add.overlap(this.defaultCollectibleGroup, this.player, (player, collectible) => {
+            const col = collectible as BaseCollectible;
+            col.collect();
+            this.sfxManager.playSound('bellSfx');
+        });
+
+        // destroy bullets on contact, add explosion
+        this.physics.add.collider(this.platforms, this.bulletGroup, (platforms, projectile) => {
+            projectile.destroy();
+
+            const proj = projectile as DefaultBullet;
+            this.createExplosion(proj.x, proj.y);
+        });
+
+        this.physics.add.collider(this.platforms, this.kineticBulletGroup, (platforms, projectile) => {
+            projectile.destroy();
+        });
+
+        this.physics.add.overlap(this.explosionsGroup, this.enemyGhostGroup, (explosion, enemy) => {
+            const ghost = enemy as EnemyGhost;
+            ghost.setTint(0xff0000);
+            ghost.applyDamage(200);
+        });
+
+        this.physics.add.overlap(this.enemyGhostGroup, this.bulletGroup, (ghost, projectile) => {
+            const enemy = ghost as EnemyGhost;
+            const defaultProjectile = projectile as DefaultBullet;
+            enemy.applyDamage(defaultProjectile.damage);
+            this.createExplosion(defaultProjectile.x, defaultProjectile.y);
+            defaultProjectile.destroy();
+        });
+
+        this.physics.add.overlap(this.enemyGhostGroup, this.kineticBulletGroup, (ghost, projectile) => {
+            const enemy = ghost as EnemyGhost;
+            const kineticProjectile = projectile as KineticBullet;
+            enemy.applyDamage(kineticProjectile.damage);
+            kineticProjectile.destroy();
+        });
+
+        this.physics.add.collider(this.enemyGhostGroup, this.platforms);
+    }
+
+    createWorld() {
+        this.platforms = this.physics.add.staticGroup();
+
+        this.backgroundImage = this.add.image(CENTER.w, CENTER.h, 'background').setPipeline('Light2D');
+
+        this.createPlatforms(this.platformsCount);
+        this.createFloor();
     }
 }
