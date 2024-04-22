@@ -37,6 +37,8 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
 
         this.currentWeapon = this.weaponsHotbar[0];
 
+        // this.weaponsHotbar[2].bulletSpeed = 1200;
+
         scene.light = scene.lights.addLight(100, 100, 128).setIntensity(this.lightIntensity);
     }
 
@@ -50,18 +52,22 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
     shoot() {
         // typeof this.scene['fireBullet'] === 'function'
         if (this.scene.fireBullet) {
-            if (this.canShoot && this.currentWeapon.ammunitionQuantity > 0) {
-                this.scene.fireBullet(
-                    this.currentWeapon.ammunitionType,
-                    this.currentWeapon.recoil,
-                    this.currentWeapon.sound || '',
-                    this.currentWeapon.baseDamage,
-                    this.currentWeapon.bulletSpeed
-                );
-                this.currentWeapon.ammunitionQuantity--;
+            if (this.canShoot) {
+                if (this.currentWeapon.ammunitionQuantity > 0) {
+                    this.scene.fireBullet(
+                        this.currentWeapon.ammunitionType,
+                        this.currentWeapon.recoil,
+                        this.currentWeapon.sound || '',
+                        this.currentWeapon.baseDamage,
+                        this.currentWeapon.bulletSpeed
+                    );
+                    this.currentWeapon.ammunitionQuantity--;
 
-                // emit event, passing current ammo data
-                playerEvents.emit('ammo', this.currentWeapon.ammunitionQuantity);
+                    // emit event, passing current ammo data
+                    playerEvents.emit('ammo', this.currentWeapon.ammunitionQuantity);
+                } else {
+                    this.scene.sfxManager.playSound('weaponSwitchSfx');
+                }
 
                 this.canShoot = false;
                 setTimeout(() => (this.canShoot = true), this.currentWeapon.reloadTime);

@@ -23,7 +23,7 @@ export class BaseCollectible extends Physics.Arcade.Sprite {
     }
 
     collect() {
-        this.player.resources.addResource('crystals', 1);
+        this.player.resources.addResource(this.resourceType, 1);
         this.destroy();
     }
 }
@@ -32,26 +32,5 @@ export class BaseCollectibleGroup extends Physics.Arcade.Group {
     constructor(scene: Scene) {
         super(scene.physics.world, scene);
         this.runChildUpdate = true;
-        // this.defaultKey = 'defaultCollectible';
-
-        // this.createMultiple({
-        //     classType: BaseCollectible,
-        //     quantity: 20,
-        //     active: true,
-        //     visible: true,
-        //     setXY: {
-        //         stepX: 50,
-        //     },
-
-        //     setDepth: { z: 5 },
-
-        //     key: 'defaultCollectible',
-        // });
     }
-    // spreadRandomly() {
-    //     this.children.entries.forEach((entry) => {
-    //         // entry.body!.position.x = Math.random() * 1000;
-    //         // entry.body!.position.y = Math.random() * 1000;
-    //     });
-    // }
 }
