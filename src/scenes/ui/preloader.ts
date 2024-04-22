@@ -41,17 +41,18 @@ const images = [
 ];
 
 export class Preloader {
-    constructor(private scene: Scene) {}
+    // constructor(private scene: Scene) {}
 
-    loadAudio() {
+    // maybe instead constructor scene, add parameter to the load functions, to allow dependency injection
+    loadAudio(scene: Scene) {
         for (let sound of audio) {
-            this.scene.load.audio(sound.name, sound.url);
+            scene.load.audio(sound.name, sound.url);
         }
     }
 
-    loadImages() {
+    loadImages(scene: Scene) {
         for (let image of images) {
-            this.scene.load.image(image.name, image.url);
+            scene.load.image(image.name, image.url);
         }
     }
 }

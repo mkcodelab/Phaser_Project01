@@ -17,17 +17,21 @@ import { Explosion, ExplosionsGroup } from '../entities/vfx/explosion/explosion'
 import { Preloader } from './ui/preloader';
 import { SfxManager } from '../managers/audioManagers/sfxManager';
 
-type AudioSound = Sound.HTML5AudioSound | Sound.WebAudioSound | Sound.NoAudioSound;
+// type AudioSound = Sound.HTML5AudioSound | Sound.WebAudioSound | Sound.NoAudioSound;
 
 export class Level01 extends Scene {
-    constructor() {
-        super('level01');
-        this.preloader = new Preloader(this);
+    constructor(key: string, private preloader: Preloader) {
+        super(key);
+        // make dependency injection here, but be aware of possible circular dependency!!
+        // this.preloader = new Preloader(this);
+        // this.preloader = new Preloader();
+        this.preloader = preloader;
 
+        // this.sfxManager = new SfxManager(this);
         this.sfxManager = new SfxManager(this);
     }
 
-    preloader: Preloader;
+    // preloader: Preloader;
     sfxManager: SfxManager;
 
     backgroundImage: GameObjects.Image;
@@ -54,8 +58,8 @@ export class Level01 extends Scene {
     piesel: any;
 
     preload() {
-        this.preloader.loadImages();
-        this.preloader.loadAudio();
+        this.preloader.loadImages(this);
+        this.preloader.loadAudio(this);
 
         this.load.spritesheet('explosion', 'assets/boom3.png', { frameWidth: 128, frameHeight: 128 });
 
@@ -195,6 +199,7 @@ export class Level01 extends Scene {
     }
 
     initPlayer() {
+        // maybe use DI here as well...
         this.player = new PlayerArcade(this, 20, 20, 'gumiak');
         this.player.setBounce(0.2);
         this.playerControls = new PlayerControlsArcade(this, this.player);

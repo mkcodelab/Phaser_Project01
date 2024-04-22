@@ -1,6 +1,7 @@
 import { Game } from 'phaser';
 import { Level01 } from './scenes/level_01';
 import { HUD } from './scenes/ui/hud';
+import { Preloader } from './scenes/ui/preloader';
 
 export const CENTER = {
     w: window.innerWidth / 2,
@@ -14,7 +15,7 @@ const config = {
     height: window.innerHeight,
     pixelart: true,
 
-    scene: [Level01, HUD],
+    // scene: [Level01, HUD],
 
     physics: {
         default: 'arcade',
@@ -26,3 +27,8 @@ const config = {
 };
 
 const game = new Game(config);
+const preloader = new Preloader();
+game.scene.add('HUD', new HUD());
+game.scene.add('Level01', new Level01('Level01', preloader));
+
+game.scene.start('Level01');
