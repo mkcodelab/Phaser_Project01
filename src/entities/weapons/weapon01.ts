@@ -37,15 +37,32 @@ export class Weapon02 implements Weapon {
     bulletSpeed?: number;
 
     constructor(weaponConfig: Weapon) {
-        this.ammunitionType = weaponConfig.ammunitionType;
-        this.ammunitionQuantity = weaponConfig.ammunitionQuantity;
-        this.shotType = weaponConfig.shotType;
-        this.baseDamage = weaponConfig.baseDamage;
-        this.reloadTime = weaponConfig.reloadTime;
-        this.recoil = weaponConfig.recoil;
-        this.sound = weaponConfig.sound;
-        this.name = weaponConfig.name;
-        this.bulletSpeed = weaponConfig.bulletSpeed;
+        // standard
+        // this.ammunitionType = weaponConfig.ammunitionType;
+        // this.ammunitionQuantity = weaponConfig.ammunitionQuantity;
+        // this.shotType = weaponConfig.shotType;
+        // this.baseDamage = weaponConfig.baseDamage;
+        // this.reloadTime = weaponConfig.reloadTime;
+        // this.recoil = weaponConfig.recoil;
+        // this.sound = weaponConfig.sound;
+        // this.name = weaponConfig.name;
+        // this.bulletSpeed = weaponConfig.bulletSpeed;
+
+        // this works also
+        // ({
+        //     ammunitionType: this.ammunitionType,
+        //     ammunitionQuantity: this.ammunitionQuantity,
+        //     shotType: this.shotType,
+        //     baseDamage: this.baseDamage,
+        //     reloadTime: this.reloadTime,
+        //     recoil: this.recoil,
+        //     sound: this.sound,
+        //     name: this.name,
+        //     bulletSpeed: this.bulletSpeed,
+        // } = weaponConfig);
+
+        // but this is super short
+        Object.assign(this, weaponConfig);
     }
 }
 
