@@ -1,4 +1,4 @@
-import { Scene, Sound, GameObjects, Physics } from 'phaser';
+import { Scene, GameObjects, Physics } from 'phaser';
 import { CENTER } from '..';
 import { PlayerArcade } from '../entities/player/playerArcade';
 import { PlayerControlsArcade } from '../entities/player/playerControlsArcade';
@@ -13,18 +13,17 @@ import {
 } from '../entities/projectiles/defaultBullet';
 import { BaseCollectible, BaseCollectibleGroup } from '../entities/resources/collectibles/collectible';
 import { EnemyGhost } from '../entities/enemies/enemyGhost';
-import { Explosion, ExplosionsGroup } from '../entities/vfx/explosion/explosion';
+import { ExplosionsGroup } from '../entities/vfx/explosion/explosion';
 import { Preloader } from './ui/preloader';
 import { SfxManager } from '../managers/audioManagers/sfxManager';
+import { Weapon } from '../entities/weapons/weapon01';
 
 // type AudioSound = Sound.HTML5AudioSound | Sound.WebAudioSound | Sound.NoAudioSound;
 
 export class Level01 extends Scene {
     constructor(key: string, private preloader: Preloader) {
         super(key);
-        // make dependency injection here, but be aware of possible circular dependency!!
-        // this.preloader = new Preloader(this);
-        // this.preloader = new Preloader();
+
         this.preloader = preloader;
 
         // this.sfxManager = new SfxManager(this);
@@ -115,37 +114,45 @@ export class Level01 extends Scene {
         }
     }
 
-    fireBullet(
-        bulletType: Bullet,
-        shakeIntensity = 0.001,
-        bulletSound: string,
-        bulletDamage: number,
-        bulletSpeed?: number
-    ) {
-        // this.cameras.main.shake(time, intensity)
-        this.cameras.main.shake(200, shakeIntensity);
+    fireBullet(currentWeapon: Weapon) {
+        let shotType = 'spread';
 
+        this.cameras.main.shake(200, currentWeapon.recoil);
+        type GroupType = DefaultBulletGroup | KineticBulletGroup | EnergyBulletGroup;
         let bullet: BulletClassType | undefined = undefined;
+        let group: GroupType | undefined = undefined;
 
-        switch (bulletType) {
+        switch (currentWeapon.ammunitionType) {
             case 'default':
-                bullet = this.bulletGroup.get().setActive(true).setVisible(true).setCircle(5, 3, 3);
+                group = this.bulletGroup;
                 break;
             case 'kinetic':
-                bullet = this.kineticBulletGroup.get().setActive(true).setVisible(true).setCircle(4, 2, 2);
+                group = this.kineticBulletGroup;
                 break;
             case 'energy':
-                bullet = this.energyBulletGroup.get().setActive(true).setVisible(true).setCircle(10, 5, 5);
+                group = this.energyBulletGroup;
                 break;
+            default:
+                group = this.bulletGroup;
         }
+        bullet = group.get().setActive(true).setVisible(true);
 
         if (bullet) {
             const shooter = { x: this.player.x, y: this.player.y };
             // x, y coordinates of pointer in world space
             const target = { x: this.input.activePointer.worldX, y: this.input.activePointer.worldY };
 
-            bullet.fire(shooter, target, bulletDamage, bulletSpeed);
-            this.sfxManager.playBulletSound(bulletSound);
+            // it does not spread and shoot multiple bullets, because of the single entity returned by group.get()
+            if (shotType === 'single') {
+                bullet.fire(shooter, target, currentWeapon.baseDamage, currentWeapon.bulletSpeed);
+            } else if (shotType === 'spread') {
+                const spreadValue = Math.random() * 10 * (Math.random() > 0.5 ? 1 : -1);
+                const spreadTarget = { x: target.x, y: target.y + spreadValue };
+                bullet.fire(shooter, spreadTarget, currentWeapon.baseDamage, currentWeapon.bulletSpeed);
+            }
+            if (currentWeapon.sound) {
+                this.sfxManager.playBulletSound(currentWeapon.sound);
+            }
         }
     }
 
@@ -190,8 +197,11 @@ export class Level01 extends Scene {
 
     createExplosion(x: number, y: number): void {
         // const explosion = new Explosion(this, x, y, 40);
+
+        // const explosion = this.explosionsGroup.get() as Explosion;
         const explosion = this.explosionsGroup.get();
         explosion.body.allowGravity = false;
+        explosion.setAngle(Math.random() * 360);
         explosion.setActive(true).setVisible(true).setPosition(x, y).setCircle(40, 16, 64);
         this.sfxManager.playSound('explosionSfx');
 

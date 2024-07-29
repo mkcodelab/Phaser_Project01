@@ -51,28 +51,35 @@ export class PlayerArcade extends Physics.Arcade.Sprite {
 
     shoot() {
         // typeof this.scene['fireBullet'] === 'function'
-        if (this.scene.fireBullet) {
-            if (this.canShoot) {
-                if (this.currentWeapon.ammunitionQuantity > 0) {
-                    this.scene.fireBullet(
-                        this.currentWeapon.ammunitionType,
-                        this.currentWeapon.recoil,
-                        this.currentWeapon.sound || '',
-                        this.currentWeapon.baseDamage,
-                        this.currentWeapon.bulletSpeed
-                    );
-                    this.currentWeapon.ammunitionQuantity--;
 
-                    // emit event, passing current ammo data
-                    playerEvents.emit('ammo', this.currentWeapon.ammunitionQuantity);
-                } else {
-                    this.scene.sfxManager.playSound('weaponSwitchSfx');
+        if (this.canShoot) {
+            if (this.currentWeapon.ammunitionQuantity > 0) {
+                // move those local variables to the weapon class, add shotType in weaponClass
+                // let shotType = 'single';
+                let spreadCount = 10;
+                if (this.currentWeapon.shotType == 'spread') {
+                    for (let i = 0; i < spreadCount; i++) {
+                        this.fireBullet();
+                    }
+                } else if (this.currentWeapon.shotType == 'single') {
+                    this.fireBullet();
                 }
 
-                this.canShoot = false;
-                setTimeout(() => (this.canShoot = true), this.currentWeapon.reloadTime);
+                this.currentWeapon.ammunitionQuantity--;
+
+                // emit event, passing current ammo data
+                playerEvents.emit('ammo', this.currentWeapon.ammunitionQuantity);
+            } else {
+                this.scene.sfxManager.playSound('weaponSwitchSfx');
             }
+
+            this.canShoot = false;
+            setTimeout(() => (this.canShoot = true), this.currentWeapon.reloadTime);
         }
+    }
+
+    fireBullet() {
+        this.scene.fireBullet(this.currentWeapon);
     }
 
     switchWeapon(id: number) {
